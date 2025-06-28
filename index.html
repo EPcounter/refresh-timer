@@ -13,18 +13,38 @@
     }
     .label {
       font-size: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     .timer {
-      font-size: 48px;
+      display: inline-flex;
+      gap: 5px;
+    }
+    .digit {
+      font-size: 40px;
       font-weight: bold;
-      color: #007bff;
+      background: #1e1e1e;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    }
+    .separator {
+      font-size: 40px;
+      font-weight: bold;
+      color: #555;
+      padding: 10px 0;
     }
   </style>
 </head>
 <body>
   <div class="label">Next data refresh in:</div>
-  <div id="countdown" class="timer">--:--</div>
+  <div id="countdown" class="timer">
+    <div class="digit" id="hh">--</div>
+    <div class="separator">:</div>
+    <div class="digit" id="mm">--</div>
+    <div class="separator">:</div>
+    <div class="digit" id="ss">--</div>
+  </div>
 
   <script>
     function getNextRefreshTime() {
@@ -45,11 +65,13 @@
       const nextRefresh = getNextRefreshTime();
       const diff = Math.max(0, nextRefresh - now);
 
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      document.getElementById('countdown').textContent = display;
+      document.getElementById('hh').textContent = hours.toString().padStart(2, '0');
+      document.getElementById('mm').textContent = minutes.toString().padStart(2, '0');
+      document.getElementById('ss').textContent = seconds.toString().padStart(2, '0');
     }
 
     setInterval(updateCountdown, 1000);
