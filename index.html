@@ -1,30 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auto-Restarting Countdown</title>
+  <title>Hourly Refresh Countdown</title>
+  <meta charset="UTF-8">
   <style>
-    body { font-family: Arial; text-align: center; padding-top: 30px; }
-    #countdown { font-size: 32px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      text-align: center;
+      padding-top: 40px;
+    }
+    .label {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .timer {
+      font-size: 48px;
+      font-weight: bold;
+      color: #007bff;
+    }
   </style>
 </head>
 <body>
-  <div>Data will refresh in:</div>
-  <div id="countdown">60:00</div>
+  <div class="label">Next data refresh in:</div>
+  <div id="countdown" class="timer">--:--</div>
 
   <script>
-    let duration = 3600;
-    function startCountdown() {
-      let timer = duration;
-      const countdownEl = document.getElementById('countdown');
-      const interval = setInterval(() => {
-        let minutes = Math.floor(timer / 60);
-        let seconds = timer % 60;
-        countdownEl.textContent =
-          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        if (--timer < 0) timer = duration;
-      }, 1000);
+    function getNextRefreshTime() {
+      const now = new Date();
+      const next = new Date(now);
+      next.setMinutes(5);
+      next.setSeconds(0);
+      next.setMilliseconds(0);
+
+      if (now.getMinutes() >= 5) {
+        next.setHours(next.getHours() + 1);
+      }
+      return next;
     }
-    startCountdown();
+
+    function updateCountdown() {
+      const now = new Date();
+      const nextRefresh = getNextRefreshTime();
+      const diff = Math.max(0, nextRefresh - now);
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+
+      const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('countdown').textContent = display;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
   </script>
 </body>
 </html>
