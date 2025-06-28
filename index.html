@@ -10,6 +10,16 @@
       padding: 0;
       background: transparent;
       font-family: 'Open Sans', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .next-refresh-time {
+      font-size: 16px;
+      color: #999;
+      margin-bottom: 10px;
     }
     .timer {
       display: inline-flex;
@@ -36,6 +46,7 @@
   </style>
 </head>
 <body>
+  <div class="next-refresh-time" id="next-refresh-text">Next update at --:--</div>
   <div id="countdown" class="timer">
     <div class="digit" id="hh">--</div>
     <div class="separator">:</div>
@@ -58,6 +69,16 @@
       return next;
     }
 
+    function formatAMPM(date) {
+      let hours = date.getHours();
+      let minutes = date.getMinutes();
+      const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      return hours + ':' + minutes + ' ' + ampm;
+    }
+
     function updateCountdown() {
       const now = new Date();
       const nextRefresh = getNextRefreshTime();
@@ -70,6 +91,8 @@
       document.getElementById('hh').textContent = hours.toString().padStart(2, '0');
       document.getElementById('mm').textContent = minutes.toString().padStart(2, '0');
       document.getElementById('ss').textContent = seconds.toString().padStart(2, '0');
+
+      document.getElementById('next-refresh-text').textContent = 'Next update at ' + formatAMPM(nextRefresh);
     }
 
     setInterval(updateCountdown, 1000);
