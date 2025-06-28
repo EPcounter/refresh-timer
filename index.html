@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auto-Restarting Countdown</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding-top: 30px; }
+    #countdown { font-size: 32px; }
+  </style>
+</head>
+<body>
+  <div>Data will refresh in:</div>
+  <div id="countdown">60:00</div>
+
+  <script>
+    let duration = 3600;
+    function startCountdown() {
+      let timer = duration;
+      const countdownEl = document.getElementById('countdown');
+      const interval = setInterval(() => {
+        let minutes = Math.floor(timer / 60);
+        let seconds = timer % 60;
+        countdownEl.textContent =
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (--timer < 0) timer = duration;
+      }, 1000);
+    }
+    startCountdown();
+  </script>
+</body>
+</html>
