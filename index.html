@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Countdown Only</title>
+  <title>Countdown with Local Time</title>
   <meta charset="UTF-8">
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
   <style>
@@ -16,14 +16,15 @@
       height: 100vh;
       flex-direction: column;
     }
-    .next-refresh-time {
+    .local-date {
       font-size: 14px;
       color: #999;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .timer {
       display: inline-flex;
       gap: 2px;
+      margin-bottom: 8px;
     }
     .digit {
       font-size: 28px;
@@ -43,10 +44,14 @@
       background: linear-gradient(to bottom, #eee, #ccc);
       color: #333;
     }
+    .next-refresh-time {
+      font-size: 14px;
+      color: #999;
+    }
   </style>
 </head>
 <body>
-  <div class="next-refresh-time" id="next-refresh-text">Next update at --:--</div>
+  <div class="local-date" id="local-date">Loading date...</div>
   <div id="countdown" class="timer">
     <div class="digit" id="hh">--</div>
     <div class="separator">:</div>
@@ -54,19 +59,19 @@
     <div class="separator">:</div>
     <div class="digit seconds" id="ss">--</div>
   </div>
+  <div class="next-refresh-time" id="next-refresh-text">Next update at --:-- (--:--)</div>
 
   <script>
-    function getNextRefreshTime() {
-      const now = new Date();
-      const next = new Date(now);
-      next.setMinutes(5);
-      next.setSeconds(0);
-      next.setMilliseconds(0);
+    const abuDhabiOffset = 4 * 60; // UTC+4 in minutes
 
-      if (now.getMinutes() >= 5) {
-        next.setHours(next.getHours() + 1);
-      }
-      return next;
+    function getAbuDhabiTime(date = new Date()) {
+      const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+      return new Date(utc + abuDhabiOffset * 60000);
+    }
+
+    function formatDate(date) {
+      const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
     }
 
     function formatAMPM(date) {
@@ -79,24 +84,42 @@
       return hours + ':' + minutes + ' ' + ampm;
     }
 
-    function updateCountdown() {
-      const now = new Date();
-      const nextRefresh = getNextRefreshTime();
-      const diff = Math.max(0, nextRefresh - now);
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      document.getElementById('hh').textContent = hours.toString().padStart(2, '0');
-      document.getElementById('mm').textContent = minutes.toString().padStart(2, '0');
-      document.getElementById('ss').textContent = seconds.toString().padStart(2, '0');
-
-      document.getElementById('next-refresh-text').textContent = 'Next update at ' + formatAMPM(nextRefresh);
+    function getNextRefreshTime(nowAbuDhabi) {
+      const next = new Date(nowAbuDhabi);
+      next.setMinutes(5);
+      next.setSeconds(0);
+      next.setMilliseconds(0);
+      if (nowAbuDhabi.getMinutes() >= 5) {
+        next.setHours(next.getHours() + 1);
+      }
+      return next;
     }
 
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+    function updateDisplay() {
+      const now = new Date();
+      const abuDhabiNow = getAbuDhabiTime(now);
+      const nextRefresh = getNextRefreshTime(abuDhabiNow);
+      const diff = Math.max(0, nextRefresh - abuDhabiNow);
+
+      const hours = abuDhabiNow.getHours().toString().padStart(2, '0');
+      const minutes = abuDhabiNow.getMinutes().toString().padStart(2, '0');
+      const seconds = abuDhabiNow.getSeconds().toString().padStart(2, '0');
+
+      document.getElementById('hh').textContent = hours;
+      document.getElementById('mm').textContent = minutes;
+      document.getElementById('ss').textContent = seconds;
+      document.getElementById('local-date').textContent = formatDate(abuDhabiNow);
+
+      const cdHours = Math.floor(diff / (1000 * 60 * 60));
+      const cdMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const cdSeconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const countdown = `${cdHours.toString().padStart(2, '0')}:${cdMinutes.toString().padStart(2, '0')}:${cdSeconds.toString().padStart(2, '0')}`;
+
+      document.getElementById('next-refresh-text').textContent = `Next update at ${formatAMPM(nextRefresh)} (${countdown})`;
+    }
+
+    setInterval(updateDisplay, 1000);
+    updateDisplay();
   </script>
 </body>
 </html>
